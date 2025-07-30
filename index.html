@@ -3,107 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Planilla Exportable</title>
+  <title>Planilla de Liquidación</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    body { font-family: Arial; padding: 10px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
-    input[type="text"], input[type="date"], input[type="number"] {
-      width: 100%; box-sizing: border-box; text-align: center;
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      margin: 0;
+      background: #fff;
     }
-    .btn { padding: 5px 10px; margin: 2px; cursor: pointer; }
-    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
-      -webkit-appearance: none; margin: 0;
+    h1 {
+      font-size: 20px;
     }
-    input[type=number] { -moz-appearance: textfield; }
+    input, select, button {
+      font-size: 16px;
+      margin: 4px 0;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 4px;
+      text-align: center;
+    }
+    .btn {
+      padding: 8px 12px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    .small-input {
+      width: 50px;
+    }
+    @media (max-width: 600px) {
+      th, td {
+        font-size: 12px;
+        padding: 2px;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <h3>Chofer: Diego Martinez</h3>
-  <h3>Patente: EMU 881</h3>
-  <label for="mes">Liquidación del mes:</label>
-  <input type="text" id="mes" placeholder="Ej: Julio 2025" />
+<h1>Chofer: Alejo Martinez</h1>
+<h1>Patente: ADN 145</h1>
 
-  <table id="tabla">
-    <tr style="background-color: #f0f0f0; font-weight: bold;">
-      <td>Fecha</td><td>Cliente</td><td>Contenedor</td><td>Destino</td>
-      <td>V</td><td>f</td><td>20</td><td>40</td><td>GAS-OIL</td>
-      <td>LITROS</td><td>REMITO</td><td>VALOR FLETE</td>
-      <td>ADELANTO</td><td>C.PORT</td><td>Acciones</td>
-    </tr>
+<label for="mes">Liquidación del mes:</label>
+<input type="text" id="mes" placeholder="Ej: Julio 2025" style="width:100%"><br><br>
+
+<table id="tabla">
+  <thead>
     <tr>
-      <td><input type="date" id="fecha"></td>
-      <td><input type="text" id="cliente"></td>
-      <td><input type="text" id="contenedor"></td>
-      <td><input type="text" id="destino"></td>
-      <td><input type="text" id="v" readonly onclick="toggleExclusivo('v','f')"></td>
-      <td><input type="text" id="f" readonly onclick="toggleExclusivo('f','v')"></td>
-      <td><input type="text" id="num20" readonly onclick="toggleExclusivo('num20','num40')"></td>
-      <td><input type="text" id="num40" readonly onclick="toggleExclusivo('num40','num20')"></td>
-      <td><input type="text" id="gasoil"></td>
-      <td><input type="number" id="litros"></td>
-      <td><input type="text" id="remito"></td>
-      <td><input type="text" id="valorFlete"></td>
-      <td><input type="text" id="adelanto"></td>
-      <td><input type="text" id="cport"></td>
-      <td><button class="btn" onclick="agregarFila()">Agregar</button></td>
+      <th>Fecha</th><th>Cliente</th><th>Contenedor</th><th>Destino</th>
+      <th>V</th><th>F</th><th>20</th><th>40</th>
+      <th>GAS-OIL</th><th>LITROS</th><th>REMITO</th><th>VALOR FLETE</th><th>ADELANTO</th><th>C.PORT</th><th>Eliminar</th>
     </tr>
-  </table>
+  </thead>
+  <tbody id="cuerpo"></tbody>
+</table>
 
-  <br />
-  <button class="btn" onclick="exportarExcel()">📁 Exportar a Excel</button>
+<button class="btn" onclick="agregarFila()">Agregar fila</button>
+<button class="btn" onclick="exportarExcel()">Exportar a Excel</button>
 
-  <script>
-    function toggleExclusivo(id1, id2) {
-      const campo1 = document.getElementById(id1);
-      const campo2 = document.getElementById(id2);
-      campo1.value = campo1.value === "X" ? "" : "X";
-      campo2.value = "";
-    }
+<script>
+function agregarFila() {
+  const tbody = document.getElementById("cuerpo");
+  const fila = document.createElement("tr");
 
-    function agregarFila() {
-      const campos = ['fecha','cliente','contenedor','destino','v','f','num20','num40',
-                      'gasoil','litros','remito','valorFlete','adelanto','cport'];
-      const fila = document.createElement('tr');
-      campos.forEach(id => {
-        const td = document.createElement('td');
-        td.innerText = document.getElementById(id).value;
-        fila.appendChild(td);
-      });
-      const tdBoton = document.createElement('td');
-      const btn = document.createElement('button');
-      btn.innerText = '🗑️';
-      btn.className = 'btn';
-      btn.onclick = () => fila.remove();
-      tdBoton.appendChild(btn);
-      fila.appendChild(tdBoton);
-      document.getElementById("tabla").appendChild(fila);
-      campos.forEach(id => document.getElementById(id).value = "");
-    }
+  const columnas = ["fecha", "cliente", "contenedor", "destino", "v", "f", "20", "40", "gas", "litros", "remito", "flete", "adelanto", "cport"];
+  columnas.forEach(col => {
+    const td = document.createElement("td");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = col === "flete" ? "moneda" : "small-input";
+    input.setAttribute("data-col", col);
 
-    function exportarExcel() {
-      const tabla = document.getElementById("tabla");
-      let datos = [];
-      for (let i = 1; i < tabla.rows.length; i++) {
-        let fila = [];
-        for (let j = 0; j < tabla.rows[i].cells.length - 1; j++) {
-          fila.push(tabla.rows[i].cells[j].innerText);
+    input.oninput = () => {
+      if (col === "v") fila.querySelector('[data-col="f"]').value = "";
+      if (col === "f") fila.querySelector('[data-col="v"]').value = "";
+      if (col === "20") fila.querySelector('[data-col="40"]').value = "";
+      if (col === "40") fila.querySelector('[data-col="20"]').value = "";
+      if (col === "flete") {
+        input.value = input.value.replace(/[^0-9.,]/g, '');
+        if (input.value && !input.value.startsWith("$") && !input.value.includes("$")) {
+          input.value = "$" + input.value;
         }
-        datos.push(fila);
       }
+      if (["v", "f"].includes(col)) {
+        fila.querySelector('[data-col="v"]').value = col === "v" ? "X" : "";
+        fila.querySelector('[data-col="f"]').value = col === "f" ? "X" : "";
+      }
+      if (["20", "40"].includes(col)) {
+        fila.querySelector('[data-col="20"]').value = col === "20" ? "X" : "";
+        fila.querySelector('[data-col="40"]').value = col === "40" ? "X" : "";
+      }
+    };
 
-      const ws = XLSX.utils.aoa_to_sheet([
-        ['Fecha','Cliente','Contenedor','Destino','V','f','20','40','GAS-OIL','LITROS','REMITO','VALOR FLETE','ADELANTO','C.PORT'],
-        ...datos
-      ]);
+    td.appendChild(input);
+    fila.appendChild(td);
+  });
 
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Planilla");
+  const tdEliminar = document.createElement("td");
+  const btnEliminar = document.createElement("button");
+  btnEliminar.textContent = "X";
+  btnEliminar.onclick = () => fila.remove();
+  tdEliminar.appendChild(btnEliminar);
+  fila.appendChild(tdEliminar);
 
-      XLSX.writeFile(wb, `Planilla_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-  </script>
+  tbody.appendChild(fila);
+}
+
+function exportarExcel() {
+  const wb = XLSX.utils.book_new();
+  const ws_data = [];
+
+  // Agregar chofer, patente y mes
+  ws_data.push(["Chofer: Alejo Martinez"]);
+  ws_data.push(["Patente: ADN 145"]);
+  ws_data.push(["Liquidación del mes: " + (document.getElementById("mes").value || "")]);
+  ws_data.push([]);
+
+  const headers = Array.from(document.querySelectorAll("#tabla thead th")).map(th => th.innerText);
+  ws_data.push(headers.slice(0, -1));
+
+  document.querySelectorAll("#cuerpo tr").forEach(tr => {
+    const fila = [];
+    tr.querySelectorAll("td input").forEach(input => fila.push(input.value));
+    ws_data.push(fila);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  XLSX.utils.book_append_sheet(wb, ws, document.getElementById("mes").value || "Planilla");
+  XLSX.writeFile(wb, "liquidacion.xlsx");
+}
+</script>
+
 </body>
 </html>
