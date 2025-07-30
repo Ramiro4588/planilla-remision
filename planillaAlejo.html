@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Planilla de Carga</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    table, th, td { border: 1px solid black; border-collapse: collapse; }
+    th, td { padding: 5px; text-align: center; }
+    input[type="text"], input[type="number"], input[type="date"] {
+      width: 100%; box-sizing: border-box;
+    }
+    .btn { margin: 5px; padding: 8px 12px; cursor: pointer; }
+    .delete-btn { background-color: red; color: white; border: none; }
+    .section-title { font-size: 1.2em; margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h2>Planilla de Carga</h2>
+
+  <p><strong>Chofer:</strong> Alejo Martinez</p>
+  <p><strong>Patente:</strong> ADN 145</p>
+  <label><strong>Liquidación del mes:</strong>
+    <input type="month" id="mesLiquidacion" />
+  </label>
+
+  <p class="section-title">Estás por ingresar un nuevo registro</p>
+
+<table>
+  <tr style="background-color: #f0f0f0; font-weight: bold;">
+    <td>Fecha</td>
+    <td>Cliente</td>
+    <td>Contenedor</td>
+    <td>Destino</td>
+    <td>V</td>
+    <td>F</td>
+    <td>20</td>
+    <td>40</td>
+    <td>GAS-OIL</td>
+    <td>LITROS</td>
+    <td>REMITO</td>
+    <td>VALOR FLETE</td>
+    <td>ADELANTO</td>
+    <td>C.PORT</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><input type="date" id="fecha" /></td>
+    <td><input type="text" id="cliente" /></td>
+    <td><input type="text" id="contenedor" /></td>
+    <td><input type="text" id="destino" /></td>
+    <td><input type="text" id="v" /></td>
+    <td><input type="text" id="f" /></td>
+    <td><input type="number" id="num20" /></td>
+    <td><input type="number" id="num40" /></td>
+    <td><input type="text" id="gasoil" /></td>
+    <td><input type="number" id="litros" /></td>
+    <td><input type="text" id="remito" /></td>
+    <td><input type="text" id="valorFlete" placeholder="$" oninput="agregarSimboloPeso(this)" /></td>
+    <td><input type="number" id="adelanto" /></td>
+    <td><input type="text" id="cport" /></td>
+    <td><button class="btn" onclick="agregarFila()">Agregar</button></td>
+  </tr>
+</table>
+
+  <h3>Registros</h3>
+  <table id="tablaDatos">
+    <thead>
+      <tr>
+        <th>Fecha</th><th>Cliente</th><th>Contenedor</th><th>Destino</th><th>V</th><th>f</th><th>20</th><th>40</th><th>GAS-OIL</th><th>LITROS</th><th>REMITO</th><th>VALOR FLETE</th><th>ADELANTO</th><th>C.PORT</th><th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Filas ingresadas -->
+    </tbody>
+  </table>
+
+  <button class="btn" onclick="exportarExcel()">Exportar a Excel</button>
+
+  <script>
+    function agregarSimboloPeso(input) {
+      if (!input.value.startsWith("$")) {
+        input.value = "$" + input.value.replace(/[^0-9]/g, '');
+      }
+    }
+
+    function agregarFila() {
+      const fila = document.createElement("tr");
+      const campos = ["fecha", "cliente", "contenedor", "destino", "V", "F", "num20", "num40", "gasoil", "litros", "remito", "valorFlete", "adelanto", "cport"];
+
+      campos.forEach(id => {
+        const valor = document.getElementById(id).value;
+        const celda = document.createElement("td");
+        celda.textContent = valor;
+        fila.appendChild(celda);
+      });
+
+      const botonEliminar = document.createElement("button");
+      botonEliminar.textContent = "Eliminar";
+      botonEliminar.className = "delete-btn";
+      botonEliminar.onclick = () => fila.remove();
+
+      const celdaAccion = document.createElement("td");
+      celdaAccion.appendChild(botonEliminar);
+      fila.appendChild(celdaAccion);
+
+      document.querySelector("#tablaDatos tbody").appendChild(fila);
+
+      // Limpiar campos
+      campos.forEach(id => document.getElementById(id).value = "");
+    }
+
+    function exportarExcel() {
+      const tabla = document.getElementById("tablaDatos");
+      const wb = XLSX.utils.table_to_book(tabla, { sheet: "Registros" });
+      XLSX.writeFile(wb, "planilla_carga.xlsx");
+    }
+  </script>
+
+</body>
+</html>
