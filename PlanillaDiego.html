@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planilla de Liquidación</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      margin: 0;
+      background: #fff;
+    }
+    h1 {
+      font-size: 20px;
+    }
+    input, select, button {
+      font-size: 16px;
+      margin: 4px 0;
+      padding: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 4px;
+      text-align: center;
+    }
+    .btn {
+      padding: 8px 12px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    .small-input {
+      width: 50px;
+    }
+    @media (max-width: 600px) {
+      th, td {
+        font-size: 12px;
+        padding: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Chofer: Alejo Martinez</h1>
+<h1>Patente: ADN 145</h1>
+
+<label for="mes">Liquidación del mes:</label>
+<input type="text" id="mes" placeholder="Ej: Julio 2025" style="width:100%"><br><br>
+
+<table id="tabla">
+  <thead>
+    <tr>
+      <th>Fecha</th><th>Cliente</th><th>Contenedor</th><th>Destino</th>
+      <th>V</th><th>F</th><th>20</th><th>40</th>
+      <th>GAS-OIL</th><th>LITROS</th><th>REMITO</th><th>VALOR FLETE</th><th>ADELANTO</th><th>C.PORT</th><th>Eliminar</th>
+    </tr>
+  </thead>
+  <tbody id="cuerpo"></tbody>
+</table>
+
+<button class="btn" onclick="agregarFila()">Agregar fila</button>
+<button class="btn" onclick="exportarExcel()">Exportar a Excel</button>
+
+<script>
+function agregarFila() {
+  const tbody = document.getElementById("cuerpo");
+  const fila = document.createElement("tr");
+
+  const columnas = ["fecha", "cliente", "contenedor", "destino", "v", "f", "20", "40", "gas", "litros", "remito", "flete", "adelanto", "cport"];
+  columnas.forEach(col => {
+    const td = document.createElement("td");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = col === "flete" ? "moneda" : "small-input";
+    input.setAttribute("data-col", col);
+
+    input.oninput = () => {
+      if (col === "v") fila.querySelector('[data-col="f"]').value = "";
+      if (col === "f") fila.querySelector('[data-col="v"]').value = "";
+      if (col === "20") fila.querySelector('[data-col="40"]').value = "";
+      if (col === "40") fila.querySelector('[data-col="20"]').value = "";
+      if (col === "flete") {
+        input.value = input.value.replace(/[^0-9.,]/g, '');
+        if (input.value && !input.value.startsWith("$") && !input.value.includes("$")) {
+          input.value = "$" + input.value;
+        }
+      }
+      if (["v", "f"].includes(col)) {
+        fila.querySelector('[data-col="v"]').value = col === "v" ? "X" : "";
+        fila.querySelector('[data-col="f"]').value = col === "f" ? "X" : "";
+      }
+      if (["20", "40"].includes(col)) {
+        fila.querySelector('[data-col="20"]').value = col === "20" ? "X" : "";
+        fila.querySelector('[data-col="40"]').value = col === "40" ? "X" : "";
+      }
+    };
+
+    td.appendChild(input);
+    fila.appendChild(td);
+  });
+
+  const tdEliminar = document.createElement("td");
+  const btnEliminar = document.createElement("button");
+  btnEliminar.textContent = "X";
+  btnEliminar.onclick = () => fila.remove();
+  tdEliminar.appendChild(btnEliminar);
+  fila.appendChild(tdEliminar);
+
+  tbody.appendChild(fila);
+}
+
+function exportarExcel() {
+  const wb = XLSX.utils.book_new();
+  const ws_data = [];
+
+  // Agregar chofer, patente y mes
+  ws_data.push(["Chofer: Alejo Martinez"]);
+  ws_data.push(["Patente: ADN 145"]);
+  ws_data.push(["Liquidación del mes: " + (document.getElementById("mes").value || "")]);
+  ws_data.push([]);
+
+  const headers = Array.from(document.querySelectorAll("#tabla thead th")).map(th => th.innerText);
+  ws_data.push(headers.slice(0, -1));
+
+  document.querySelectorAll("#cuerpo tr").forEach(tr => {
+    const fila = [];
+    tr.querySelectorAll("td input").forEach(input => fila.push(input.value));
+    ws_data.push(fila);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  XLSX.utils.book_append_sheet(wb, ws, document.getElementById("mes").value || "Planilla");
+  XLSX.writeFile(wb, "liquidacion.xlsx");
+}
+</script>
+
+</body>
+</html>
