@@ -71,29 +71,51 @@
 <button class="btn" onclick="exportarExcel()">Exportar a Excel</button>
 
 <script>
-function agregarFila() {
+function guardarDatos() {
+  const filas = [];
+  document.querySelectorAll("#cuerpo tr").forEach(tr => {
+    const fila = [];
+    tr.querySelectorAll("td input").forEach(input => fila.push(input.value));
+    filas.push(fila);
+  });
+  localStorage.setItem("planilla_datos", JSON.stringify(filas));
+  localStorage.setItem("planilla_mes", document.getElementById("mes").value);
+}
+
+function cargarDatos() {
+  const datos = JSON.parse(localStorage.getItem("planilla_datos") || "[]");
+  const mes = localStorage.getItem("planilla_mes") || "";
+  document.getElementById("mes").value = mes;
+  datos.forEach(valores => {
+    agregarFila(valores);
+  });
+}
+
+function agregarFila(valores = []) {
   const tbody = document.getElementById("cuerpo");
   const fila = document.createElement("tr");
-
   const columnas = ["fecha", "cliente", "contenedor", "destino", "v", "f", "20", "40", "gas", "litros", "remito", "flete", "adelanto", "cport"];
-  columnas.forEach(col => {
+  columnas.forEach((col, i) => {
     const td = document.createElement("td");
     const input = document.createElement("input");
     input.type = "text";
     input.className = col === "flete" ? "moneda" : "small-input";
     input.setAttribute("data-col", col);
+    input.value = valores[i] || "";
 
     input.oninput = () => {
       if (col === "v") fila.querySelector('[data-col="f"]').value = "";
       if (col === "f") fila.querySelector('[data-col="v"]').value = "";
       if (col === "20") fila.querySelector('[data-col="40"]').value = "";
       if (col === "40") fila.querySelector('[data-col="20"]').value = "";
+
       if (col === "flete") {
         input.value = input.value.replace(/[^0-9.,]/g, '');
         if (input.value && !input.value.startsWith("$") && !input.value.includes("$")) {
           input.value = "$" + input.value;
         }
       }
+
       if (["v", "f"].includes(col)) {
         fila.querySelector('[data-col="v"]').value = col === "v" ? "X" : "";
         fila.querySelector('[data-col="f"]').value = col === "f" ? "X" : "";
@@ -102,6 +124,8 @@ function agregarFila() {
         fila.querySelector('[data-col="20"]').value = col === "20" ? "X" : "";
         fila.querySelector('[data-col="40"]').value = col === "40" ? "X" : "";
       }
+
+      guardarDatos();
     };
 
     td.appendChild(input);
@@ -111,18 +135,20 @@ function agregarFila() {
   const tdEliminar = document.createElement("td");
   const btnEliminar = document.createElement("button");
   btnEliminar.textContent = "X";
-  btnEliminar.onclick = () => fila.remove();
+  btnEliminar.onclick = () => {
+    fila.remove();
+    guardarDatos();
+  };
   tdEliminar.appendChild(btnEliminar);
   fila.appendChild(tdEliminar);
 
   tbody.appendChild(fila);
+  guardarDatos();
 }
 
 function exportarExcel() {
   const wb = XLSX.utils.book_new();
   const ws_data = [];
-
-  // Agregar chofer, patente y mes
   ws_data.push(["Chofer: Alejo Martinez"]);
   ws_data.push(["Patente: ADN 145"]);
   ws_data.push(["Liquidación del mes: " + (document.getElementById("mes").value || "")]);
@@ -141,6 +167,8 @@ function exportarExcel() {
   XLSX.utils.book_append_sheet(wb, ws, document.getElementById("mes").value || "Planilla");
   XLSX.writeFile(wb, "liquidacion.xlsx");
 }
+
+window.onload = cargarDatos;
 </script>
 
 </body>
