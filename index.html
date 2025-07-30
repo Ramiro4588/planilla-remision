@@ -1,51 +1,28 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Planilla de Carga</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planilla Exportable</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
+    body { font-family: Arial; padding: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
+    input[type="text"], input[type="date"], input[type="number"] {
+      width: 100%; box-sizing: border-box; text-align: center;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
+    .btn { padding: 5px 10px; margin: 2px; cursor: pointer; }
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+      -webkit-appearance: none; margin: 0;
     }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 5px;
-      text-align: center;
-    }
-    input[type="text"],
-    input[type="date"] {
-      width: 100%;
-      box-sizing: border-box;
-      text-align: center;
-    }
-    .btn {
-      padding: 5px 10px;
-      margin: 2px;
-      cursor: pointer;
-    }
-
-    /* Ocultar flechas de inputs numéricos */
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type=number] {
-      -moz-appearance: textfield;
-    }
+    input[type=number] { -moz-appearance: textfield; }
   </style>
 </head>
 <body>
 
-  <h3>Chofer: Alejo Martinez</h3>
-  <h3>Patente: ADN 145</h3>
+  <h3>Chofer: Diego Martinez</h3>
+  <h3>Patente: EMU 881</h3>
   <label for="mes">Liquidación del mes:</label>
   <input type="text" id="mes" placeholder="Ej: Julio 2025" />
 
@@ -57,20 +34,20 @@
       <td>ADELANTO</td><td>C.PORT</td><td>Acciones</td>
     </tr>
     <tr>
-      <td><input type="date" id="fecha" /></td>
-      <td><input type="text" id="cliente" /></td>
-      <td><input type="text" id="contenedor" /></td>
-      <td><input type="text" id="destino" /></td>
-      <td><input type="text" id="v" readonly onclick="toggleExclusivo('v','f')" /></td>
-      <td><input type="text" id="f" readonly onclick="toggleExclusivo('f','v')" /></td>
-      <td><input type="text" id="num20" readonly onclick="toggleExclusivo('num20','num40')" /></td>
-      <td><input type="text" id="num40" readonly onclick="toggleExclusivo('num40','num20')" /></td>
-      <td><input type="text" id="gasoil" /></td>
-      <td><input type="number" id="litros" /></td>
-      <td><input type="text" id="remito" /></td>
-      <td><input type="text" id="valorFlete" /></td>
-      <td><input type="text" id="adelanto" /></td>
-      <td><input type="text" id="cport" /></td>
+      <td><input type="date" id="fecha"></td>
+      <td><input type="text" id="cliente"></td>
+      <td><input type="text" id="contenedor"></td>
+      <td><input type="text" id="destino"></td>
+      <td><input type="text" id="v" readonly onclick="toggleExclusivo('v','f')"></td>
+      <td><input type="text" id="f" readonly onclick="toggleExclusivo('f','v')"></td>
+      <td><input type="text" id="num20" readonly onclick="toggleExclusivo('num20','num40')"></td>
+      <td><input type="text" id="num40" readonly onclick="toggleExclusivo('num40','num20')"></td>
+      <td><input type="text" id="gasoil"></td>
+      <td><input type="number" id="litros"></td>
+      <td><input type="text" id="remito"></td>
+      <td><input type="text" id="valorFlete"></td>
+      <td><input type="text" id="adelanto"></td>
+      <td><input type="text" id="cport"></td>
       <td><button class="btn" onclick="agregarFila()">Agregar</button></td>
     </tr>
   </table>
@@ -82,55 +59,51 @@
     function toggleExclusivo(id1, id2) {
       const campo1 = document.getElementById(id1);
       const campo2 = document.getElementById(id2);
-      if (campo1.value === "X") {
-        campo1.value = "";
-      } else {
-        campo1.value = "X";
-        campo2.value = "";
-      }
+      campo1.value = campo1.value === "X" ? "" : "X";
+      campo2.value = "";
     }
 
     function agregarFila() {
-      const campos = [
-        'fecha', 'cliente', 'contenedor', 'destino',
-        'v', 'f', 'num20', 'num40', 'gasoil', 'litros',
-        'remito', 'valorFlete', 'adelanto', 'cport'
-      ];
-
+      const campos = ['fecha','cliente','contenedor','destino','v','f','num20','num40',
+                      'gasoil','litros','remito','valorFlete','adelanto','cport'];
       const fila = document.createElement('tr');
       campos.forEach(id => {
         const td = document.createElement('td');
-        const valor = document.getElementById(id).value;
-        td.innerText = valor;
+        td.innerText = document.getElementById(id).value;
         fila.appendChild(td);
       });
-
-      // Botón eliminar
       const tdBoton = document.createElement('td');
-      const botonEliminar = document.createElement('button');
-      botonEliminar.innerText = '🗑️';
-      botonEliminar.className = 'btn';
-      botonEliminar.onclick = () => fila.remove();
-      tdBoton.appendChild(botonEliminar);
+      const btn = document.createElement('button');
+      btn.innerText = '🗑️';
+      btn.className = 'btn';
+      btn.onclick = () => fila.remove();
+      tdBoton.appendChild(btn);
       fila.appendChild(tdBoton);
-
-      document.getElementById('tabla').appendChild(fila);
-
-      // Limpiar inputs
+      document.getElementById("tabla").appendChild(fila);
       campos.forEach(id => document.getElementById(id).value = "");
     }
 
     function exportarExcel() {
-      let tabla = document.getElementById("tabla");
-      let html = tabla.outerHTML.replace(/ /g, '%20');
+      const tabla = document.getElementById("tabla");
+      let datos = [];
+      for (let i = 1; i < tabla.rows.length; i++) {
+        let fila = [];
+        for (let j = 0; j < tabla.rows[i].cells.length - 1; j++) {
+          fila.push(tabla.rows[i].cells[j].innerText);
+        }
+        datos.push(fila);
+      }
 
-      const nombreArchivo = "planilla_" + new Date().toISOString().slice(0,10) + ".xls";
-      const enlace = document.createElement('a');
-      enlace.href = 'data:application/vnd.ms-excel,' + html;
-      enlace.download = nombreArchivo;
-      enlace.click();
+      const ws = XLSX.utils.aoa_to_sheet([
+        ['Fecha','Cliente','Contenedor','Destino','V','f','20','40','GAS-OIL','LITROS','REMITO','VALOR FLETE','ADELANTO','C.PORT'],
+        ...datos
+      ]);
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Planilla");
+
+      XLSX.writeFile(wb, `Planilla_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
   </script>
-
 </body>
 </html>
